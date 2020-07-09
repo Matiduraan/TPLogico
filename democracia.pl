@@ -52,7 +52,7 @@ candidato(catherine,59,rojo).
 candidato(garret,64,azul).
 candidato(linda,30,azul).
 candidato(jackie,38,amarillo).
-candidato(seth,_,amarillo).
+/*candidato(seth,_,amarillo).*/
 candidato(heather,51,amarillo).
 
 % 2)
@@ -170,8 +170,42 @@ leGanaA(Candidato1,Candidato2,Provincia):-
 % Para todas las provincias en las cuales su partido compite, el mismo gana.
 % Es el candidato más joven de su partido.
 
-% elGranCandidato(Candidato):-
+
+esMasJoven(Candidato1,Candidato2):-
+    candidato(Candidato1,Edad1,_),
+    candidato(Candidato2,Edad2,_),
+    Edad1 =< Edad2.
+
+esElMasJovenDelPartido(Candidato):-
+    candidato(Candidato,_,Partido),
+    forall(candidato(Candidato2,_,Partido), esMasJoven(Candidato,Candidato2)).
+    
+ganaEnTodasLasProvincias(Candidato):-
+    candidato(Candidato,_,Partido),
+    forall(partido(Partido, Provincia), partidoGanadorEnLaProvincia(Partido,Provincia)).
+
+partidoGanadorEnLaProvincia(Partido,Provincia):-
+    partido(Partido,Provincia),
+    forall(partido(OtrosPartidos,Provincia), ganaEnLaProvincia(Partido,OtrosPartidos,Provincia)).
+
+ganaEnLaProvincia(Partido1,Partido2,Provincia):-
+    intencionDeVotoEn(Provincia,Partido1,Porcentaje1),
+    intencionDeVotoEn(Provincia,Partido2,Porcentaje2),
+    Porcentaje1 > Porcentaje2.
+    
+elGranCandidato(Candidato):-
+    esElMasJovenDelPartido(Candidato),
+    ganaEnTodasLasProvincias(Candidato).
+
+% 5)
+
+ajusteConsultora(Partido,Provincia):-
+    partidoGanadorEnLaProvincia(Partido,Provincia),
+    intencionDeVotoEn(Provincia,Partido,CantidadDeVotos),
+    CantidadDeVotos is CantidadDeVotos + 20.
 
 
-
-
+ajusteConsultora(Partido,Provincia):-
+    not(partidoGanadorEnLaProvincia(Partido,Provincia)),
+    intencionDeVotoEn(Provincia,Partido,CantidadDeVotos),
+    CantidadDeVotos is CantidadDeVotos - 5.
